@@ -47,11 +47,12 @@
             </div>
 
             <div class="p-8 md:p-14">
-                <form id="complaintForm" class="space-y-10">
+                <form action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-10">
+                    @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="space-y-3">
                             <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block">Kategori Pelaporan <span class="text-red-500">*</span></label>
-                            <select class="w-full pl-6 pr-12 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all appearance-none shadow-sm">
+                            <select name="kategori" required class="w-full pl-6 pr-12 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all appearance-none shadow-sm">
                                 <option>Layanan Akademik & KRS</option>
                                 <option>Kendala Sistem SIRENA</option>
                                 <option>Fasilitas Gedung/Lab</option>
@@ -60,13 +61,13 @@
                         </div>
                         <div class="space-y-3">
                             <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block">Subjek Laporan <span class="text-red-500">*</span></label>
-                            <input type="text" placeholder="Contoh: Lampu Ruang Kuliah Mati" class="w-full px-6 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none shadow-sm">
+                            <input type="text" name="subjek" required placeholder="Contoh: Lampu Ruang Kuliah Mati" class="w-full px-6 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none shadow-sm">
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block">Kronologi / Deskripsi Masalah <span class="text-red-500">*</span></label>
-                        <textarea rows="7" placeholder="Jelaskan secara detail masalah yang kamu hadapi..." class="w-full px-6 py-5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none resize-none shadow-sm"></textarea>
+                        <textarea name="deskripsi" required rows="7" placeholder="Jelaskan secara detail masalah yang kamu hadapi..." class="w-full px-6 py-5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none resize-none shadow-sm"></textarea>
                     </div>
 
                     <div class="space-y-3">
@@ -75,7 +76,7 @@
                             <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md mb-5"><i data-lucide="image-plus" class="w-8 h-8 text-blue-600"></i></div>
                             <p class="text-sm font-bold text-slate-800">Klik untuk upload foto bukti</p>
                             <p class="text-[10px] text-slate-500 mt-2 font-black uppercase tracking-widest">PNG, JPG, PDF • MAKS 5MB</p>
-                            <input type="file" class="hidden">
+                            <input type="file" name="lampiran" class="hidden">
                         </div>
                     </div>
 
@@ -90,6 +91,7 @@
 
     <script>
         lucide.createIcons();
+        /*
         document.getElementById('complaintForm').addEventListener('submit', function(e) {
             e.preventDefault();
             Swal.fire({
@@ -101,6 +103,7 @@
                 window.location.href = "/mahasiswa/dashboard";
             });
         });
+        */
     </script>
 </body>
 </html>

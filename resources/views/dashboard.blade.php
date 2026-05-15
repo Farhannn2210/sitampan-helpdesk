@@ -71,26 +71,57 @@
                             <tr class="text-[10px] text-slate-400 uppercase tracking-[0.3em] border-b border-slate-50">
                                 <th class="px-10 py-6 font-bold">Identitas Pelapor</th>
                                 <th class="px-10 py-6 font-bold">Kategori</th>
+                                <th class="px-10 py-6 font-bold">Subjek</th>
                                 <th class="px-10 py-6 font-bold text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
+                            @forelse ($laporans as $laporan)
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-10 py-8">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center font-bold text-blue-600">FM</div>
+                                        <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center font-bold text-blue-600">
+                                            <i data-lucide="user" class="w-5 h-5"></i>
+                                        </div>
                                         <div>
-                                            <p class="font-bold text-sm text-slate-900">Muh. Farhan Masese</p>
-                                            <p class="text-[10px] font-medium text-slate-400 italic">F55122091</p>
+                                            <p class="font-bold text-sm text-slate-900">{{ $laporan->user->name ?? 'Mahasiswa' }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-10 py-8 text-xs font-bold text-slate-500 uppercase italic">Akademik</td>
-                                <td class="px-10 py-8 text-center">
-                                    <span class="px-4 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[9px] font-black uppercase ring-1 ring-amber-200">Diproses</span>
+                                <td class="px-10 py-8 text-xs font-bold text-slate-500 uppercase italic">{{ $laporan->kategori }}</td>
+                                <td class="px-10 py-8 text-xs font-bold text-slate-700">{{ $laporan->subjek }}</td>
+                                <td class="px-10 py-8 text-center flex justify-center items-center gap-2">
+                                    <span class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl text-[9px] font-black uppercase ring-1 ring-slate-200">{{ $laporan->status }}</span>
+                                    
+                                    <form action="{{ route('laporan.updateStatus', $laporan->id) }}" method="POST" class="flex gap-2 items-center ml-2 border-l border-slate-200 pl-4">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="status" class="bg-white border border-slate-200 text-xs rounded-lg px-2 py-1 outline-none">
+                                            <option value="baru" {{ $laporan->status == 'baru' ? 'selected' : '' }}>Baru</option>
+                                            <option value="diproses" {{ $laporan->status == 'diproses' ? 'selected' : '' }}>Diproses</option>
+                                            <option value="selesai" {{ $laporan->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                            <option value="ditolak" {{ $laporan->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                        </select>
+                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-lg transition" title="Update Status">
+                                            <i data-lucide="check" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('laporan.destroy', $laporan->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" onclick="return confirm('Hapus laporan ini?')" class="bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-500 p-1.5 rounded-lg transition border border-transparent hover:border-red-200" title="Hapus Laporan">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
-                            </tbody>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-10 py-8 text-center text-slate-500 font-medium">Belum ada laporan.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
                     </table>
                 </div>
             </div>

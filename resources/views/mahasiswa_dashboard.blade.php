@@ -83,19 +83,34 @@
                     <h3 class="font-bold text-slate-800">Aduan Saya Terbaru</h3>
                     <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Update 2026</span>
                 </div>
-                <div class="p-8">
+                <div class="p-8 space-y-4">
+                    @forelse ($laporans as $laporan)
                     <div class="flex items-center justify-between p-6 bg-white border-2 border-slate-50 rounded-[2rem] hover:border-blue-100 transition shadow-sm">
                         <div class="flex items-center gap-5">
-                            <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-white font-bold">
+                            <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 font-bold">
                                 <i data-lucide="clock" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="font-bold text-slate-800 italic text-sm">"Gagal Input KRS Portal Akademik"</p>
-                                <p class="text-[10px] text-slate-400 font-medium mt-1">ID: #TP-901 • 15 Mei 2026</p>
+                                <p class="font-bold text-slate-800 italic text-sm">"{{ $laporan->subjek }}"</p>
+                                <p class="text-[10px] text-slate-400 font-medium mt-1">
+                                    <span class="uppercase">{{ $laporan->kategori }}</span> • {{ $laporan->created_at->format('d M Y') }}
+                                </p>
                             </div>
                         </div>
-                        <span class="px-4 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-tighter ring-1 ring-amber-200">Sedang Diproses</span>
+                        <span class="px-4 py-1.5 
+                            @if($laporan->status == 'baru') bg-blue-50 text-blue-700 ring-blue-200
+                            @elseif($laporan->status == 'diproses') bg-amber-50 text-amber-700 ring-amber-200
+                            @elseif($laporan->status == 'selesai') bg-green-50 text-green-700 ring-green-200
+                            @else bg-red-50 text-red-700 ring-red-200 @endif
+                            rounded-xl text-[10px] font-black uppercase tracking-tighter ring-1">
+                            {{ $laporan->status }}
+                        </span>
                     </div>
+                    @empty
+                    <div class="text-center py-6">
+                        <p class="text-slate-500 font-medium">Belum ada aduan yang kamu buat.</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </main>
