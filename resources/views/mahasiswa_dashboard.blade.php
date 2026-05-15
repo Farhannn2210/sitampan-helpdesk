@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mahasiswa | SITAMPAN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+    @vite('resources/css/app.css')
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-sora { font-family: 'Sora', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800" x-data="{ open: false }">
+
+    <div x-show="open" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-300"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="fixed inset-y-0 left-0 w-72 bg-slate-900 text-white z-50 shadow-2xl flex flex-col">
+        
+        <div class="p-8 border-b border-white/5 flex justify-between items-center">
+            <span class="font-sora font-extrabold text-xl italic text-blue-400">SITAMPAN</span>
+            <button @click="open = false" class="text-white/50 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <nav class="flex-1 px-6 py-8 space-y-2">
+            <a href="/mahasiswa/dashboard" class="flex items-center p-4 bg-blue-600 rounded-2xl font-bold text-sm shadow-lg shadow-blue-900/20 text-white">
+                <i data-lucide="home" class="mr-3 w-5 h-5"></i> Beranda
+            </a>
+            <a href="/mahasiswa/buat-aduan" class="flex items-center p-4 hover:bg-white/5 rounded-2xl text-slate-400 transition group">
+                <i data-lucide="plus-circle" class="mr-3 w-5 h-5 group-hover:text-blue-400"></i> Buat Aduan Baru
+            </a>
+            <a href="#" class="flex items-center p-4 hover:bg-white/5 rounded-2xl text-slate-400 transition group">
+                <i data-lucide="history" class="mr-3 w-5 h-5 group-hover:text-blue-400"></i> Riwayat Aduan
+            </a>
+        </nav>
+
+        <div class="p-8 border-t border-white/5">
+            <a href="/" class="text-red-400 font-bold flex items-center hover:text-red-300 transition">
+                <i data-lucide="log-out" class="mr-2 w-5 h-5"></i> Keluar
+            </a>
+        </div>
+    </div>
+
+    <div x-show="open" @click="open = false" class="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"></div>
+
+    <div class="min-h-screen flex flex-col">
+        <header class="h-20 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+            <button @click="open = true" class="p-2 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition">
+                <i data-lucide="menu" class="w-6 h-6 text-slate-600"></i>
+            </button>
+            <div class="flex items-center gap-4">
+                <div class="text-right leading-none">
+                    <p class="text-sm font-bold">Muh. Farhan Dg. Masese</p>
+                    <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Mahasiswa</p>
+                </div>
+                <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
+                    FM
+                </div>
+            </div>
+        </header>
+
+        <main class="p-8 max-w-5xl mx-auto w-full space-y-8">
+            <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 rounded-[2.5rem] p-10 md:p-14 text-white shadow-2xl relative overflow-hidden group">
+                <div class="relative z-10">
+                    <h2 class="text-4xl font-sora font-extrabold leading-tight tracking-tighter">Halo, Farhan! 👋</h2>
+                    <p class="mt-3 text-blue-100 opacity-90 max-w-md font-light">Ada kendala akademik atau fasilitas kampus hari ini? Tim SITAMPAN siap memproses laporanmu.</p>
+                    <a href="/mahasiswa/buat-aduan" class="mt-8 inline-flex items-center px-8 py-4 bg-white text-blue-700 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all duration-300">
+                        <i data-lucide="plus" class="mr-2 w-4 h-4"></i> Buat Laporan Sekarang
+                    </a>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition duration-1000"></div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Aduan Saya Terbaru</h3>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Update 2026</span>
+                </div>
+                <div class="p-8">
+                    <div class="flex items-center justify-between p-6 bg-white border-2 border-slate-50 rounded-[2rem] hover:border-blue-100 transition shadow-sm">
+                        <div class="flex items-center gap-5">
+                            <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-white font-bold">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 italic text-sm">"Gagal Input KRS Portal Akademik"</p>
+                                <p class="text-[10px] text-slate-400 font-medium mt-1">ID: #TP-901 • 15 Mei 2026</p>
+                            </div>
+                        </div>
+                        <span class="px-4 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-tighter ring-1 ring-amber-200">Sedang Diproses</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
