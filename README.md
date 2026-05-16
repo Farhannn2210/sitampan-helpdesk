@@ -1,59 +1,131 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SITAMPAN Helpdesk
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi helpdesk/pengaduan berbasis Laravel (PHP 8.2+) dengan Tailwind + Vite. Admin dapat membalas aduan mahasiswa secara manual atau menggunakan AI (OpenRouter).
 
-## About Laravel
+## Prasyarat
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.2+
+- Composer
+- Node.js + npm
+- Database MySQL (atau sesuaikan konfigurasi `DB_*`)
+- (Opsional) API key OpenRouter untuk fitur balasan AI
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Setup (pertama kali)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1) Install dependency PHP:
 
-## Learning Laravel
+```bash
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+2) Buat file environment:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+copy .env.example .env
+```
 
-## Laravel Sponsors
+3) Atur koneksi database di `.env`:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database_anda
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-### Premium Partners
+4) Generate APP_KEY:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+php artisan key:generate
+```
 
-## Contributing
+5) Jalankan migrasi:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan migrate
+```
 
-## Code of Conduct
+6) Install dependency front-end:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+npm install
+```
 
-## Security Vulnerabilities
+7) (Opsional) Buat symbolic link storage (jika memakai file upload/asset dari storage):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan storage:link
+```
 
-## License
+### Setup cepat (opsional)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Project ini menyediakan script:
+
+```bash
+composer run setup
+```
+
+Catatan: script ini akan menyalin `.env` jika belum ada, generate key, menjalankan migrasi, lalu `npm install` dan `npm run build`. Pastikan `DB_*` di `.env` sudah benar sebelum menjalankan.
+
+## Menjalankan project (development)
+
+Cara termudah:
+
+```bash
+composer run dev
+```
+
+Script di atas akan menjalankan:
+
+- `php artisan serve` (Laravel server)
+- `php artisan queue:listen` (queue listener)
+- `npm run dev` (Vite)
+
+Default URL: `http://127.0.0.1:8000`
+
+Jika ingin manual (tanpa script):
+
+Terminal 1:
+
+```bash
+php artisan serve
+```
+
+Terminal 2:
+
+```bash
+npm run dev
+```
+
+## Konfigurasi AI (OpenRouter)
+
+Fitur balasan AI memakai OpenRouter. Isi variabel berikut di `.env`:
+
+```dotenv
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_API_KEY=isi_api_key_anda
+OPENROUTER_MODEL=deepseek/deepseek-v4-flash:free
+
+# Disarankan true untuk production.
+# Jika di Windows terkena masalah SSL (cURL error 60), bisa set false untuk DEV.
+OPENROUTER_VERIFY_TLS=true
+
+# Timeout request ke OpenRouter (detik)
+OPENROUTER_TIMEOUT=90
+OPENROUTER_CONNECT_TIMEOUT=15
+OPENROUTER_RETRIES=1
+```
+
+## Menjalankan test
+
+```bash
+php artisan test
+```
+
+Atau via script:
+
+```bash
+composer run test
+```
