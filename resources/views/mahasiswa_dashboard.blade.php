@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Mahasiswa | SITAMPAN</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
     @vite('resources/css/app.css')
@@ -11,6 +12,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .font-sora { font-family: 'Sora', sans-serif; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-[#F8FAFC] text-slate-800" x-data="{ open: false }">
@@ -85,26 +87,76 @@
                 </div>
                 <div class="p-8 space-y-4">
                     @forelse ($laporans as $laporan)
-                    <div class="flex items-center justify-between p-6 bg-white border-2 border-slate-50 rounded-[2rem] hover:border-blue-100 transition shadow-sm">
-                        <div class="flex items-center gap-5">
-                            <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 font-bold">
-                                <i data-lucide="clock" class="w-6 h-6"></i>
+                    <div class="p-6 bg-white border-2 border-slate-50 rounded-[2rem] hover:border-blue-100 transition shadow-sm" x-data="{ openChat:false }">
+                        <div class="flex items-center justify-between gap-6">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 font-bold">
+                                    <i data-lucide="clock" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 italic text-sm">"{{ $laporan->subjek }}"</p>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-1">
+                                        <span class="uppercase">{{ $laporan->kategori }}</span> • {{ $laporan->created_at->format('d M Y') }}
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-bold text-slate-800 italic text-sm">"{{ $laporan->subjek }}"</p>
-                                <p class="text-[10px] text-slate-400 font-medium mt-1">
-                                    <span class="uppercase">{{ $laporan->kategori }}</span> • {{ $laporan->created_at->format('d M Y') }}
-                                </p>
+
+                            <div class="flex items-center gap-3">
+                                <span class="px-4 py-1.5 
+                                    @if($laporan->status == 'baru') bg-blue-50 text-blue-700 ring-blue-200
+                                    @elseif($laporan->status == 'diproses') bg-amber-50 text-amber-700 ring-amber-200
+                                    @elseif($laporan->status == 'selesai') bg-green-50 text-green-700 ring-green-200
+                                    @else bg-red-50 text-red-700 ring-red-200 @endif
+                                    rounded-xl text-[10px] font-black uppercase tracking-tighter ring-1">
+                                    {{ $laporan->status }}
+                                </span>
+
+                                <button type="button" @click="openChat = !openChat" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-black rounded-xl uppercase tracking-widest flex items-center gap-2">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    <span x-text="openChat ? 'Tutup Chat' : 'Lihat Chat'"></span>
+                                </button>
                             </div>
                         </div>
-                        <span class="px-4 py-1.5 
-                            @if($laporan->status == 'baru') bg-blue-50 text-blue-700 ring-blue-200
-                            @elseif($laporan->status == 'diproses') bg-amber-50 text-amber-700 ring-amber-200
-                            @elseif($laporan->status == 'selesai') bg-green-50 text-green-700 ring-green-200
-                            @else bg-red-50 text-red-700 ring-red-200 @endif
-                            rounded-xl text-[10px] font-black uppercase tracking-tighter ring-1">
-                            {{ $laporan->status }}
-                        </span>
+
+                        <div x-cloak x-show="openChat" class="mt-6 space-y-4">
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                                <div class="max-h-64 overflow-y-auto space-y-3">
+                                    @forelse ($laporan->messages as $msg)
+                                        @if ($msg->sender === 'admin')
+                                            <div class="flex justify-end">
+                                                <div class="max-w-[85%] bg-slate-900 text-white rounded-2xl px-4 py-3">
+                                                    <div class="flex items-center justify-between gap-3 mb-1">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest text-white/70">Admin</p>
+                                                        <span class="text-[10px] font-bold text-white/60">{{ $msg->created_at->format('d M Y H:i') }}</span>
+                                                    </div>
+                                                    <p class="text-xs font-semibold leading-relaxed whitespace-pre-line">{{ $msg->message }}</p>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="flex justify-start">
+                                                <div class="max-w-[85%] bg-white border border-slate-200 rounded-2xl px-4 py-3">
+                                                    <div class="flex items-center justify-between gap-3 mb-1">
+                                                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Saya</p>
+                                                        <span class="text-[10px] font-bold text-slate-400">{{ $msg->created_at->format('d M Y H:i') }}</span>
+                                                    </div>
+                                                    <p class="text-xs font-semibold leading-relaxed whitespace-pre-line text-slate-700">{{ $msg->message }}</p>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @empty
+                                        <p class="text-xs text-slate-500 font-semibold">Belum ada percakapan.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <form action="{{ route('laporan.mahasiswaSendMessage', $laporan->id) }}" method="POST" class="space-y-3">
+                                @csrf
+                                <textarea name="message" rows="3" required class="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none resize-none shadow-sm" placeholder="Tulis pesan lanjutan untuk admin..."></textarea>
+                                <div class="flex items-center justify-end">
+                                    <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-2xl uppercase tracking-widest">Kirim Pesan</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     @empty
                     <div class="text-center py-6">

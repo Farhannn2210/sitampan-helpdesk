@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Panel | SITAMPAN</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700;800&display=swap" rel="stylesheet">
     @vite('resources/css/app.css')
@@ -12,6 +13,7 @@
         body { font-family: 'Inter', sans-serif; }
         .font-sora { font-family: 'Sora', sans-serif; }
         .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-[#F8FAFC]" x-data="{ open: false }">
@@ -75,8 +77,8 @@
                                 <th class="px-10 py-6 font-bold text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            @forelse ($laporans as $laporan)
+                        @forelse ($laporans as $laporan)
+                        <tbody class="divide-y divide-slate-50" x-data="{ showRespon:false, aiLoading:false, aiError:'' }">
                             <tr class="hover:bg-slate-50/50 transition">
                                 <td class="px-10 py-8">
                                     <div class="flex items-center gap-4">
@@ -114,14 +116,134 @@
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </form>
+
+                                    <button type="button" @click="showRespon = !showRespon" class="bg-slate-900 hover:bg-slate-800 text-white p-1.5 rounded-lg transition" title="Respon Aduan">
+                                        <i data-lucide="reply" class="w-4 h-4"></i>
+                                    </button>
                                 </td>
                             </tr>
-                            @empty
+
+                            <tr x-cloak x-show="showRespon" class="bg-slate-50/40">
+                                <td colspan="4" class="px-10 py-8">
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        <div class="space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Detail Aduan</p>
+                                                @if ($laporan->lampiran)
+                                                    <a href="{{ asset('storage/'.$laporan->lampiran) }}" target="_blank" class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Lihat Lampiran</a>
+                                                @endif
+                                            </div>
+                                            <div class="bg-white border border-slate-200 rounded-2xl p-5">
+                                                <p class="text-xs font-bold text-slate-900 mb-2">Deskripsi</p>
+                                                <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">{{ $laporan->deskripsi }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Percakapan</p>
+                                                <button
+                                                    type="button"
+                                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl uppercase tracking-widest disabled:opacity-60"
+                                                    :disabled="aiLoading"
+                                                    @click="
+                                                        aiError = '';
+                                                        aiLoading = true;
+                                                        fetch('{{ route('laporan.generateResponAi', $laporan->id) }}', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content'),
+                                                                'Accept': 'application/json',
+                                                                'Content-Type': 'application/json'
+                                                            },
+                                                            body: JSON.stringify({})
+                                                        })
+                                                        .then(async (r) => {
+                                                            const data = await r.json().catch(() => ({}));
+                                                            if (!r.ok) throw data;
+                                                            return data;
+                                                        })
+                                                        .then((data) => {
+                                                            if (data && data.respon) {
+                                                                $refs.responText.value = data.respon;
+                                                                $refs.responSumber.value = 'ai';
+                                                            }
+                                                        })
+                                                        .catch((e) => {
+                                                            const baseMsg = (e && (e.message || e.error)) ? (e.message || e.error) : 'Gagal generate respon AI';
+                                                            const detail = (e && e.detail) ? (' • ' + e.detail) : '';
+                                                            const hint = (e && e.hint) ? (' • ' + e.hint) : '';
+                                                            aiError = baseMsg + detail + hint;
+                                                        })
+                                                        .finally(() => { aiLoading = false; });
+                                                    "
+                                                >
+                                                    <span x-show="!aiLoading">Generate AI</span>
+                                                    <span x-show="aiLoading">Memproses...</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="bg-white border border-slate-200 rounded-2xl p-5">
+                                                <div class="max-h-72 overflow-y-auto space-y-3">
+                                                    @forelse ($laporan->messages as $msg)
+                                                        @if ($msg->sender === 'admin')
+                                                            <div class="flex justify-end">
+                                                                <div class="max-w-[85%] bg-slate-900 text-white rounded-2xl px-4 py-3">
+                                                                    <div class="flex items-center justify-between gap-3 mb-1">
+                                                                        <p class="text-[10px] font-black uppercase tracking-widest text-white/70">Admin</p>
+                                                                        <div class="flex items-center gap-2">
+                                                                            @if ($msg->source)
+                                                                                <span class="px-2 py-0.5 bg-white/10 text-white/80 rounded-lg text-[9px] font-black uppercase">{{ $msg->source }}</span>
+                                                                            @endif
+                                                                            <span class="text-[10px] font-bold text-white/60">{{ $msg->created_at->format('d M Y H:i') }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <p class="text-xs font-semibold leading-relaxed whitespace-pre-line">{{ $msg->message }}</p>
+                                                                </div>
+                                                            </div>
+                                                        @else
+                                                            <div class="flex justify-start">
+                                                                <div class="max-w-[85%] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                                                                    <div class="flex items-center justify-between gap-3 mb-1">
+                                                                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Mahasiswa</p>
+                                                                        <span class="text-[10px] font-bold text-slate-400">{{ $msg->created_at->format('d M Y H:i') }}</span>
+                                                                    </div>
+                                                                    <p class="text-xs font-semibold leading-relaxed whitespace-pre-line text-slate-700">{{ $msg->message }}</p>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @empty
+                                                        <p class="text-xs text-slate-500 font-semibold">Belum ada pesan.</p>
+                                                    @endforelse
+                                                </div>
+                                            </div>
+
+                                            <form action="{{ route('laporan.updateRespon', $laporan->id) }}" method="POST" class="space-y-3">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="respon_admin_sumber" value="manual" x-ref="responSumber">
+                                                <textarea x-ref="responText" name="respon_admin" rows="5" required class="w-full px-5 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none resize-none shadow-sm" placeholder="Tulis balasan baru...">{{ old('respon_admin') }}</textarea>
+
+                                                <template x-if="aiError">
+                                                    <div class="text-xs font-bold text-red-600">(AI) <span x-text="aiError"></span></div>
+                                                </template>
+
+                                                <div class="flex items-center justify-end gap-3">
+                                                    <button type="submit" class="px-6 py-3 bg-slate-900 hover:bg-blue-700 text-white font-black text-xs rounded-2xl uppercase tracking-widest">Kirim Balasan</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        @empty
+                        <tbody>
                             <tr>
                                 <td colspan="4" class="px-10 py-8 text-center text-slate-500 font-medium">Belum ada laporan.</td>
                             </tr>
-                            @endforelse
                         </tbody>
+                        @endforelse
                     </table>
                 </div>
             </div>

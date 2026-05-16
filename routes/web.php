@@ -15,12 +15,21 @@ Route::get('/admin/dashboard', [LaporanController::class, 'adminIndex'])
 Route::patch('/admin/laporan/{laporan}/status', [LaporanController::class, 'updateStatus'])
     ->name('laporan.updateStatus');
 
+Route::patch('/admin/laporan/{laporan}/respon', [LaporanController::class, 'updateRespon'])
+    ->name('laporan.updateRespon');
+
+Route::post('/admin/laporan/{laporan}/respon-ai', [LaporanController::class, 'generateResponAi'])
+    ->name('laporan.generateResponAi');
+
 Route::delete('/admin/laporan/{laporan}', [LaporanController::class, 'destroy'])
     ->name('laporan.destroy');
 
 // Route Laporan Mahasiswa
 Route::post('/mahasiswa/laporan', [LaporanController::class, 'store'])
     ->name('laporan.store');
+
+Route::post('/mahasiswa/laporan/{laporan}/pesan', [LaporanController::class, 'mahasiswaSendMessage'])
+    ->name('laporan.mahasiswaSendMessage');
 
 // 3. Dashboard MAHASISWA
 Route::get('/mahasiswa/dashboard', [LaporanController::class, 'mahasiswaIndex'])

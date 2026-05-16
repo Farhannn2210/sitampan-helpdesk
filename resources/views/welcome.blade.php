@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | SITAMPAN Helpdesk</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Sora:wght@400;700;800&display=swap" rel="stylesheet">
-    @vite('resources/css/app.css')
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite('resources/css/app.css')
+    @endif
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
