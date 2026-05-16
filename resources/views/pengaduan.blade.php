@@ -3,107 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirim Laporan | SITAMPAN Helpdesk UNTAD</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Sora:wght@400;700;800&display=swap" rel="stylesheet">
-    @vite('resources/css/app.css')
+    <title>SITAMPAN Helpdesk | Buat Aduan Baru</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .font-sora { font-family: 'Sora', sans-serif; }
-        .bg-portal {
-            background-color: #F8FAFC;
-            background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%), 
+        .bg-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%), 
                               radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.05) 0px, transparent 50%);
         }
-        textarea::-webkit-scrollbar { width: 6px; }
-        textarea::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        [x-cloak] { display: none !important; }
+        .swal2-popup { border-radius: 2rem !important; padding: 2rem !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
     </style>
 </head>
-<body class="bg-portal min-h-screen text-slate-800 p-6 md:p-12">
+<body class="bg-pattern min-h-screen text-slate-800" x-data="{ open: false, isSubmitting: false, fileName: '', fileSize: 0 }">
 
-    <div class="max-w-4xl mx-auto relative">
-        <div class="flex items-center justify-between mb-10">
-            <a href="/mahasiswa/dashboard" class="group flex items-center gap-3 bg-white px-6 py-3.5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
-                <i data-lucide="chevron-left" class="w-5 h-5 text-slate-500 group-hover:text-blue-600 group-hover:-translate-x-1 transition-all"></i>
-                <span class="text-sm font-bold text-slate-700">Kembali ke Beranda</span>
-            </a>
-            <div class="text-right">
-                <h1 class="font-sora font-black text-2xl text-slate-900 tracking-tighter italic leading-none">
-                    SITAMPAN <span class="text-blue-600 font-light not-italic">Helpdesk</span>
-                </h1>
-                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-[0.3em] mt-2">Portal Pengaduan Mahasiswa</p>
+    <div x-show="open" @click="open = false" x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"></div>
+
+    <div x-show="open" x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-300"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="fixed inset-y-0 left-0 w-72 bg-slate-900 text-white z-[70] shadow-2xl flex flex-col border-r border-white/5">
+        
+        <div class="p-8 flex justify-between items-center border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="font-sora font-extrabold text-xl tracking-tighter text-blue-400 italic uppercase">SITAMPAN</span>
             </div>
+            <button @click="open = false" class="p-2 hover:bg-white/10 rounded-full transition"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
 
-        <div class="bg-white rounded-[3rem] shadow-2xl shadow-blue-900/10 border border-white overflow-hidden">
-            <div class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 px-10 py-14 text-white relative overflow-hidden">
-                <div class="relative z-10">
-                    <h2 class="font-sora font-extrabold text-4xl tracking-tight leading-tight">Sampaikan Kendalamu 👋</h2>
-                    <p class="text-blue-100/80 text-sm mt-3 max-w-md font-medium leading-relaxed">Tuliskan permasalahanmu secara rinci. Kami menjamin kerahasiaan identitas dan keamanan datamu.</p>
-                </div>
-                <img src="{{ asset('img/Logo Untad Baru-jukebox-bg-removed.jpg') }}" class="absolute right-[-5%] bottom-[-20%] w-72 opacity-10 grayscale invert rotate-12 pointer-events-none">
-            </div>
+        <nav class="flex-1 px-6 py-8 space-y-3">
+            <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center p-4 hover:bg-white/5 rounded-2xl transition text-slate-400 hover:text-white group">
+                <i data-lucide="layout-grid" class="mr-3 w-5 h-5 group-hover:text-blue-400"></i> Beranda
+            </a>
+            <a href="{{ route('mahasiswa.buat-aduan') }}" class="flex items-center p-4 bg-blue-600/20 text-blue-400 border border-blue-500/20 rounded-2xl font-bold text-sm">
+                <i data-lucide="plus-circle" class="mr-3 w-5 h-5"></i> Buat Aduan Baru
+            </a>
+            <a href="{{ route('mahasiswa.riwayat') }}" class="flex items-center p-4 hover:bg-white/5 rounded-2xl transition text-slate-400 hover:text-white group">
+                <i data-lucide="history" class="mr-3 w-5 h-5 group-hover:text-blue-400"></i> Riwayat Aduan
+            </a>
+            <a href="{{ route('profile') }}" class="flex items-center p-4 hover:bg-white/5 rounded-2xl transition text-slate-400 hover:text-white group">
+                <i data-lucide="user" class="mr-3 w-5 h-5 group-hover:text-blue-400"></i> Profil Saya
+            </a>
+        </nav>
 
-            <div class="p-8 md:p-14">
-                <form action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-10">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-3">
-                            <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block">Kategori Pelaporan <span class="text-red-500">*</span></label>
-                            <select name="kategori" required class="w-full pl-6 pr-12 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all appearance-none shadow-sm">
-                                <option>Layanan Akademik & KRS</option>
-                                <option>Kendala Sistem SIRENA</option>
-                                <option>Fasilitas Gedung/Lab</option>
-                                <option>Keluhan Umum Kampus</option>
-                            </select>
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block">Subjek Laporan <span class="text-red-500">*</span></label>
-                            <input type="text" name="subjek" required placeholder="Contoh: Lampu Ruang Kuliah Mati" class="w-full px-6 py-4 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none shadow-sm">
-                        </div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block">Kronologi / Deskripsi Masalah <span class="text-red-500">*</span></label>
-                        <textarea name="deskripsi" required rows="7" placeholder="Jelaskan secara detail masalah yang kamu hadapi..." class="w-full px-6 py-5 bg-white border-2 border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none resize-none shadow-sm"></textarea>
-                    </div>
-
-                    <div class="space-y-3">
-                        <label class="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] ml-1 block text-nowrap">Lampiran Foto Bukti <span class="text-slate-400 font-medium italic lowercase">(opsional)</span></label>
-                        <div class="group relative border-2 border-dashed border-slate-300 rounded-[2.5rem] p-12 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-blue-50 transition-all cursor-pointer">
-                            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md mb-5"><i data-lucide="image-plus" class="w-8 h-8 text-blue-600"></i></div>
-                            <p class="text-sm font-bold text-slate-800">Klik untuk upload foto bukti</p>
-                            <p class="text-[10px] text-slate-500 mt-2 font-black uppercase tracking-widest">PNG, JPG, PDF • MAKS 5MB</p>
-                            <input type="file" name="lampiran" class="hidden">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-slate-900 hover:bg-blue-700 text-white font-sora font-extrabold py-5 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-4">
-                        <i data-lucide="send" class="w-6 h-6"></i>
-                        <span class="tracking-[0.1em] text-sm">KIRIM ADUAN SEKARANG</span>
-                    </button>
-                </form>
-            </div>
+        <div class="p-8 border-t border-white/5">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="flex items-center p-4 w-full hover:bg-red-500/10 rounded-2xl transition text-red-400 font-bold text-sm group text-left">
+                    <i data-lucide="power" class="mr-3 w-5 h-5 group-hover:scale-110 transition-transform"></i> Keluar Aplikasi
+                </button>
+            </form>
         </div>
     </div>
 
+    <header class="h-20 bg-white/80 backdrop-blur-lg border-b border-slate-100 px-6 sm:px-10 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+        <button @click="open = true" class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition text-slate-600">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-4">
+            <div class="text-right leading-none uppercase hidden sm:block">
+                <p class="text-sm font-bold">{{ auth()->user()->name ?? 'Mahasiswa' }}</p>
+                <p class="text-[10px] text-blue-600 font-bold tracking-widest">{{ auth()->user()->role ?? 'Student' }}</p>
+            </div>
+            <a href="{{ route('profile') }}" class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200 ring-2 ring-white uppercase transition-transform hover:scale-105">
+                {{ substr(auth()->user()->name ?? 'MH', 0, 2) }}
+            </a>
+        </div>
+    </header>
+
+    <main class="p-6 md:p-10 max-w-4xl mx-auto w-full">
+        <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden border border-slate-800">
+            <div class="relative z-10">
+                <h2 class="text-3xl font-sora font-extrabold tracking-tight italic">SITAMPAN <span class="font-light not-italic text-blue-400">Reports</span></h2>
+                <p class="text-slate-400 mt-2 text-sm max-w-md uppercase tracking-wide">Sampaikan laporan Anda ke fakultas dengan aman.</p>
+            </div>
+            <div class="absolute right-0 top-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+        </div>
+
+        <div class="mt-8 bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-xl">
+            @if($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-xl text-red-700 text-sm">
+                    <ul class="list-disc pl-5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form id="formAduan" action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8" @submit="isSubmitting = true">
+                @csrf
+                
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Subjek Aduan</label>
+                    <div class="relative">
+                        <i data-lucide="tag" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                        <input type="text" name="subjek" value="{{ old('subjek') }}" required placeholder="Gagal KRS, Fasilitas Rusak..." class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition font-semibold shadow-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-3" x-data="{ selectOpen: false, selected: '{{ old('kategori') }}', options: ['Layanan Akademik', 'Fasilitas Kampus', 'Sistem Informasi / IT', 'Lain-lain'] }">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Kategori Keluhan</label>
+                    <div class="relative">
+                        <input type="hidden" id="inputKategori" name="kategori" :value="selected" required>
+                        <button type="button" @click="selectOpen = !selectOpen" class="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 transition font-semibold text-left flex items-center justify-between shadow-sm">
+                            <span x-text="selected ? selected : 'Pilih Kategori...'" :class="selected ? 'text-slate-900' : 'text-slate-400'"></span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform" :class="selectOpen ? 'rotate-180' : ''"></i>
+                        </button>
+                        <i data-lucide="layers" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                        
+                        <div x-show="selectOpen" @click.outside="selectOpen = false" x-cloak x-transition class="absolute left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden py-2">
+                            <template x-for="option in options">
+                                <div @click="selected = option; selectOpen = false" 
+                                     class="px-6 py-4 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition font-semibold text-slate-600 text-sm flex items-center justify-between">
+                                    <span x-text="option"></span>
+                                    <i data-lucide="check" class="w-4 h-4 text-blue-600" x-show="selected === option"></i>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Deskripsi Detail</label>
+                    <textarea name="deskripsi" rows="5" required placeholder="Jelaskan detail kendala Anda..." class="w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition font-medium shadow-sm resize-none">{{ old('deskripsi') }}</textarea>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex justify-between items-center px-1">
+                        <span>Lampiran Bukti (Opsional)</span>
+                        <span class="text-blue-500">Maks. 10 MB</span>
+                    </label>
+                    
+                    <label class="relative group cursor-pointer block">
+                        <input type="file" name="lampiran" class="hidden" 
+                               accept="image/*"
+                               @change="
+                                if ($event.target.files[0]) {
+                                    fileName = $event.target.files[0].name; 
+                                    fileSize = ($event.target.files[0].size / 1024 / 1024).toFixed(2);
+                                }
+                               ">
+                        
+                        <div class="border-2 border-dashed border-slate-200 group-hover:border-blue-400 group-hover:bg-blue-50/30 rounded-[2rem] p-10 transition-all duration-300 flex flex-col items-center justify-center gap-4 bg-slate-50/50">
+                            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition-all shadow-sm border border-slate-100 group-hover:scale-110">
+                                <i data-lucide="upload-cloud" class="w-8 h-8" x-show="!fileName"></i>
+                                <i data-lucide="file-check" class="w-8 h-8 text-emerald-500" x-show="fileName" x-cloak></i>
+                            </div>
+                            
+                            <div class="text-center">
+                                <p class="text-sm font-bold text-slate-700" x-text="fileName ? fileName : 'Klik atau Seret File ke Sini'"></p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5" 
+                                   x-text="fileName ? 'Ukuran: ' + fileSize + ' MB' : 'Format: JPG, PNG, atau JPEG'"></p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <template x-if="fileSize > 10">
+                        <div class="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 animate-shake">
+                            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                            <p class="text-xs font-bold uppercase tracking-tight">Ukuran file terlalu besar! Maksimal 10MB saja Bang.</p>
+                        </div>
+                    </template>
+                </div>
+                <div class="pt-6 border-t border-slate-50 flex justify-end">
+                    <button type="submit" :disabled="isSubmitting || fileSize > 10" class="px-10 py-5 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl font-sora font-extrabold text-sm uppercase tracking-widest transition-all shadow-lg hover:shadow-blue-500/30 flex items-center gap-3 disabled:opacity-50">
+                        <span x-show="!isSubmitting">Kirim Aduan</span>
+                        <span x-show="isSubmitting" class="flex items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memproses...</span>
+                        <i x-show="!isSubmitting" data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
     <script>
         lucide.createIcons();
-        /*
-        document.getElementById('complaintForm').addEventListener('submit', function(e) {
+
+        document.getElementById('formAduan').addEventListener('submit', function(e) {
+            const kategori = document.getElementById('inputKategori').value;
+            
+            if (!kategori) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Kategori!',
+                    text: 'Silakan tentukan kategori kendala Anda dulu.',
+                    confirmButtonColor: '#2563EB',
+                });
+                window.dispatchEvent(new CustomEvent('reset-submit'));
+                return;
+            }
+
             e.preventDefault();
             Swal.fire({
-                title: 'Berhasil!',
-                text: 'Laporanmu sudah dikirim ke sistem.',
-                icon: 'success',
-                confirmButtonColor: '#1E40AF'
-            }).then(() => {
-                window.location.href = "/mahasiswa/dashboard";
+                title: 'Sudah Yakin?',
+                text: "Laporan akan dikirim ke tim helpdesk fakultas.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563EB',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Kirim!',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-3xl' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Sedang Mengirim...',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+                    this.submit();
+                } else {
+                    window.dispatchEvent(new CustomEvent('reset-submit'));
+                }
             });
         });
-        */
+
+        window.addEventListener('reset-submit', () => {
+            const mainEl = document.querySelector('[x-data]');
+            if (mainEl.__x) mainEl.__x.$data.isSubmitting = false;
+        });
     </script>
 </body>
 </html>
