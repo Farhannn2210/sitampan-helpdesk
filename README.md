@@ -1,3 +1,12 @@
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
+
 # SITAMPAN Helpdesk
 
 Aplikasi helpdesk/pengaduan berbasis Laravel (PHP 8.2+) dengan Tailwind + Vite. Admin dapat membalas aduan mahasiswa secara manual atau menggunakan AI (OpenRouter).
@@ -53,7 +62,7 @@ php artisan migrate
 npm install
 ```
 
-7) (Opsional) Buat symbolic link storage (jika memakai file upload/asset dari storage):
+7) Buat memakai file upload/asset dari storage:
 
 ```bash
 php artisan storage:link
@@ -107,12 +116,7 @@ Fitur balasan AI memakai OpenRouter. Isi variabel berikut di `.env`:
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_API_KEY=isi_api_key_anda
 OPENROUTER_MODEL=deepseek/deepseek-v4-flash:free
-
-# Disarankan true untuk production.
-# Jika di Windows terkena masalah SSL (cURL error 60), bisa set false untuk DEV.
 OPENROUTER_VERIFY_TLS=true
-
-# Timeout request ke OpenRouter (detik)
 OPENROUTER_TIMEOUT=90
 OPENROUTER_CONNECT_TIMEOUT=15
 OPENROUTER_RETRIES=1

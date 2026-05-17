@@ -135,7 +135,7 @@
                             <div class="bg-slate-50/50 border border-slate-200 rounded-[1.5rem] p-5 shadow-inner max-h-80 overflow-y-auto space-y-4">
                                 @forelse ($laporan->messages ?? [] as $msg)
                                     <div class="flex {{ $msg->sender === 'mahasiswa' ? 'justify-end' : 'justify-start' }}">
-                                        <div class="max-w-[85%] px-5 py-3 shadow-sm text-sm font-medium leading-relaxed
+                                        <div class="max-w-[85%] break-words px-5 py-3 shadow-sm text-sm font-medium leading-relaxed
                                             {{ $msg->sender === 'mahasiswa' 
                                                 ? 'bg-blue-600 text-white rounded-[1.5rem] rounded-tr-sm' 
                                                 : 'bg-white border border-slate-200 text-slate-700 rounded-[1.5rem] rounded-tl-sm' }}">
@@ -146,7 +146,7 @@
                                                 </div>
                                             @endif
                                             
-                                            {{ $msg->message }}
+                                            {!! nl2br(e($msg->message)) !!}
                                         </div>
                                     </div>
                                 @empty

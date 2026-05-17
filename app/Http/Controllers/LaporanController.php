@@ -113,19 +113,28 @@ class LaporanController extends Controller
     public function generateResponAi(Request $request, Laporan $laporan)
     {
         @set_time_limit(120);
-        $apiKey = $_ENV['OPENROUTER_API_KEY'] ?? env('OPENROUTER_API_KEY');
-        $model = 'google/gemini-2.0-flash-exp:free';
+        $apiKey = config('openrouter.api_key');
+        $model = config('openrouter.model', 'deepseek/deepseek-v4-flash:free');
+        $baseUrl = rtrim((string) config('openrouter.base_url', 'https://openrouter.ai/api/v1'), '/');
+        $verifyTls = (bool) config('openrouter.verify_tls', true);
+        $timeout = (int) config('openrouter.timeout', 60);
+        $connectTimeout = (int) config('openrouter.connect_timeout', 10);
 
         if (!$apiKey) return redirect()->back()->with('error', 'API Key belum dipasang!');
 
         try {
-            $response = Http::withoutVerifying()->timeout(60)->withHeaders([
+            $http = Http::timeout($timeout)->connectTimeout($connectTimeout);
+            if (!$verifyTls) {
+                $http = $http->withoutVerifying();
+            }
+
+            $response = $http->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
-            ])->post('https://openrouter.ai/api/v1/chat/completions', [
+            ])->post($baseUrl . '/chat/completions', [
                 'model' => $model,
                 'messages' => [
-                    ['role' => 'system', 'content' => 'Kamu adalah admin helpdesk SITAMPAN UNTAD. Jawab ramah & solutif.'],
+                    ['role' => 'system', 'content' => "Kamu adalah admin helpdesk SITAMPAN UNTAD. Jawab ramah, singkat, dan solutif.\n\nAturan format (WAJIB):\n- Output plain text (tanpa Markdown, tanpa **, tanpa #).\n- Pakai paragraf pendek + daftar poin dengan tanda '- '.\n- Gunakan baris baru agar rapi.\n- Maksimal 10 baris.\n\nStruktur jawaban (WAJIB):\n1) Sapaan 1 kalimat + ringkas masalahnya.\n2) 'Langkah cepat:' lalu 3-5 poin tindakan.\n3) 'Info yang dibutuhkan:' lalu 2-4 poin data yang perlu user sebutkan (contoh: pesan error, waktu kejadian, perangkat/browser, NIM bila relevan)."],
                     ['role' => 'user', 'content' => "Subjek: {$laporan->subjek}\nDeskripsi: {$laporan->deskripsi}"],
                 ],
             ]);

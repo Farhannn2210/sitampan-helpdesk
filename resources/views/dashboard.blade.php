@@ -224,11 +224,11 @@
                             <div class="bg-white border border-slate-200 rounded-[1.5rem] p-5 shadow-inner max-h-64 overflow-y-auto space-y-4">
                                 @forelse ($laporan->messages ?? [] as $msg)
                                     <div class="flex {{ $msg->sender === 'mahasiswa' ? 'justify-start' : 'justify-end' }}">
-                                        <div class="max-w-[85%] {{ $msg->sender === 'mahasiswa' ? 'bg-slate-100 text-slate-700 rounded-tl-sm' : 'bg-blue-600 text-white rounded-tr-sm' }} px-5 py-3 rounded-2xl shadow-sm text-xs font-semibold leading-relaxed">
+                                        <div class="max-w-[85%] break-words {{ $msg->sender === 'mahasiswa' ? 'bg-slate-100 text-slate-700 rounded-tl-sm' : 'bg-blue-600 text-white rounded-tr-sm' }} px-5 py-3 rounded-2xl shadow-sm text-xs font-semibold leading-relaxed">
                                             @if($msg->sender !== 'mahasiswa')
                                                 <p class="text-[8px] uppercase font-black opacity-60 mb-1 tracking-widest">{{ $msg->source == 'ai' ? '🤖 AI Assistant' : '👤 Admin Utama' }}</p>
                                             @endif
-                                            {{ $msg->message }}
+                                            {!! nl2br(e($msg->message)) !!}
                                         </div>
                                     </div>
                                 @empty
