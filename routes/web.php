@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\AuthController;
 
@@ -8,8 +9,8 @@ use App\Http\Controllers\AuthController;
 // 1. HALAMAN UTAMA (Handle Pengalihan Otomatis)
 // ==========================================================
 Route::get('/', function () { 
-    if (auth()->check()) {
-        return auth()->user()->role === 'admin' 
+    if (Auth::check()) {
+        return Auth::user()->role === 'admin' 
             ? redirect()->route('admin.dashboard') 
             : redirect()->route('mahasiswa.dashboard');
     }
@@ -55,7 +56,7 @@ Route::middleware('auth')->group(function () {
         
         // REVISI: Halaman List Riwayat (Langsung panggil data dan view-nya)
         Route::get('/riwayat', function () {
-            $laporans = \App\Models\Laporan::where('user_id', auth()->id())->latest()->get();
+            $laporans = \App\Models\Laporan::where('user_id', Auth::id())->latest()->get();
             return view('riwayat', compact('laporans'));
         })->name('mahasiswa.riwayat');
 
