@@ -44,26 +44,21 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('profile')->with('success', 'Data profil berhasil diperbarui!');
     })->name('profile.update');
 
+    // REVISI: Route Cetak PDF (Diletakkan di luar prefix agar bisa diakses Admin & Mahasiswa)
+    Route::get('/laporan/{laporan}/cetak', [LaporanController::class, 'cetakPdf'])->name('laporan.cetak');
+
     // --- AREA MAHASISWA ---
     Route::prefix('mahasiswa')->group(function () {
-        // Dashboard
         Route::get('/dashboard', [LaporanController::class, 'mahasiswaIndex'])->name('mahasiswa.dashboard');
+        Route::get('/buat-aduan', function () { return view('pengaduan'); })->name('mahasiswa.buat-aduan');
         
-        // Halaman Form Buat Aduan
-        Route::get('/buat-aduan', function () { 
-            return view('pengaduan'); 
-        })->name('mahasiswa.buat-aduan');
-        
-        // REVISI: Halaman List Riwayat (Langsung panggil data dan view-nya)
         Route::get('/riwayat', function () {
             $laporans = \App\Models\Laporan::where('user_id', Auth::id())->latest()->get();
             return view('riwayat', compact('laporans'));
         })->name('mahasiswa.riwayat');
 
-        // Proses Simpan Laporan
         Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
-        
-        Route::post('/laporan/{laporan}/pesan', [LaporanController::class, 'mahasiswaSendMessage'])->name('laporan.mahasiswaSendMessage');
+        Route::post('/laporan/{laporan}/pesan', [LaporanController::class, 'mahasiswaSendMessage'])->name('mahasiswa.send_message');
     });
 
     // --- AREA ADMIN ---
@@ -71,8 +66,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [LaporanController::class, 'adminIndex'])->name('admin.dashboard');
         Route::post('/laporan/{laporan}/status', [LaporanController::class, 'updateStatus'])->name('admin.laporan.updateStatus');
         Route::post('/laporan/{laporan}/message', [LaporanController::class, 'adminSendMessage'])->name('admin.laporan.sendMessage');
-
-        Route::patch('/laporan/{laporan}/respon', [LaporanController::class, 'adminSendMessage'])->name('laporan.updateRespon');
         Route::post('/laporan/{laporan}/respon-ai', [LaporanController::class, 'generateResponAi'])->name('laporan.generateResponAi');
         Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
     });
