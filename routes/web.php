@@ -66,7 +66,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [LaporanController::class, 'adminIndex'])->name('admin.dashboard');
         Route::post('/laporan/{laporan}/status', [LaporanController::class, 'updateStatus'])->name('admin.laporan.updateStatus');
         Route::post('/laporan/{laporan}/message', [LaporanController::class, 'adminSendMessage'])->name('admin.laporan.sendMessage');
-        Route::post('/laporan/{laporan}/respon-ai', [LaporanController::class, 'generateResponAi'])->name('laporan.generateResponAi');
+        Route::post('/laporan/{laporan}/respon-ai', [LaporanController::class, 'generateResponAi'])
+            ->middleware('throttle:5,1')
+            ->name('laporan.generateResponAi');
         Route::delete('/laporan/{laporan}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
     });
 });
