@@ -20,6 +20,15 @@
         [x-cloak] { display: none !important; }
         .animate-spin-slow { animation: spin 3s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .chat-markdown p { margin: 0.25rem 0; }
+        .chat-markdown p:first-child { margin-top: 0; }
+        .chat-markdown p:last-child { margin-bottom: 0; }
+        .chat-markdown ul, .chat-markdown ol { margin: 0.25rem 0; padding-left: 1.25rem; }
+        .chat-markdown ul { list-style: disc; }
+        .chat-markdown ol { list-style: decimal; }
+        .chat-markdown li { margin: 0.125rem 0; }
+        .chat-markdown pre { white-space: pre-wrap; }
     </style>
 </head>
 <body class="bg-app text-slate-800 min-h-screen" x-data="{ open: false }">
@@ -145,8 +154,12 @@
                                                     @if($msg->source == 'ai') <i data-lucide="sparkles" class="w-3 h-3"></i> Admin AI @else <i data-lucide="shield-check" class="w-3 h-3"></i> Admin Utama @endif
                                                 </div>
                                             @endif
-                                            
-                                            {!! nl2br(e($msg->message)) !!}
+
+                                            @if($msg->source === 'ai')
+                                                <div class="chat-markdown">{!! \Illuminate\Support\Str::markdown($msg->message, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}</div>
+                                            @else
+                                                {!! nl2br(e($msg->message)) !!}
+                                            @endif
                                         </div>
                                     </div>
                                 @empty

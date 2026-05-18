@@ -97,7 +97,11 @@
                 <span>{{ $msg->created_at->format('d/m/Y H:i') }}</span>
             </div>
             <div class="chat-body">
-                {!! nl2br(e($msg->message)) !!}
+                @if($msg->source === 'ai')
+                    {!! \Illuminate\Support\Str::markdown($msg->message, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}
+                @else
+                    {!! nl2br(e($msg->message)) !!}
+                @endif
             </div>
         </div>
     @empty
